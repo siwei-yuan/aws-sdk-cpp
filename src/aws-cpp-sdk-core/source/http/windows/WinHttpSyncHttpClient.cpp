@@ -22,6 +22,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <versionhelpers.h>
+
 using namespace Aws::Client;
 using namespace Aws::Http;
 using namespace Aws::Http::Standard;
@@ -51,7 +53,20 @@ WinHttpSyncHttpClient::WinHttpSyncHttpClient(const ClientConfiguration& config) 
     AWS_LOGSTREAM_INFO(GetLogTag(), "Creating http client with user agent " << config.userAgent << " with max connections " << config.maxConnections
         << " request timeout " << config.requestTimeoutMs << ",and connect timeout " << config.connectTimeoutMs);
 
+#if defined(WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY)
+    DWORD winhttpFlags;
+    if (config.allowSystemProxy) {
+        if (IsWindows8Point1OrGreater()) {
+            winhttpFlags = WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY;
+        } else {
+            winhttpFlags = WINHTTP_ACCESS_TYPE_DEFAULT_PROXY;
+        }
+    } else {
+        winhttpFlags = WINHTTP_ACCESS_TYPE_NO_PROXY;
+    }
+#else
     DWORD winhttpFlags = config.allowSystemProxy ? WINHTTP_ACCESS_TYPE_DEFAULT_PROXY : WINHTTP_ACCESS_TYPE_NO_PROXY;
+#endif    
     
     const char* proxyHosts = nullptr;
     Aws::String strProxyHosts;
