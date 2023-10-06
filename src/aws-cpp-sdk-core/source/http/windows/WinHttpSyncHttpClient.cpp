@@ -58,8 +58,10 @@ WinHttpSyncHttpClient::WinHttpSyncHttpClient(const ClientConfiguration& config) 
     if (config.allowSystemProxy) {
         if (IsWindows8Point1OrGreater()) {
             winhttpFlags = WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY;
+            AWS_LOGSTREAM_INFO(GetLogTag(), "On Windows Server greater than 2012");
         } else {
             winhttpFlags = WINHTTP_ACCESS_TYPE_DEFAULT_PROXY;
+            AWS_LOGSTREAM_INFO(GetLogTag(), "On Windows Server smaller or equal than 2012");
         }
     } else {
         winhttpFlags = WINHTTP_ACCESS_TYPE_NO_PROXY;
